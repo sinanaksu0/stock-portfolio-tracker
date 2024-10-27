@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import requests
 
 app = Flask(__name__)
@@ -19,30 +19,41 @@ def get_stock_price(symbol):
 
         # Check if we received valid data
         if "Time Series (1min)" in data:
-            # Extract the most recent stock price
             latest_time = list(data["Time Series (1min)"])[0]
             latest_price = data["Time Series (1min)"][latest_time]["1. open"]
             return float(latest_price)
         else:
-            # Handle errors in the response
             return None
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
 
+# Function to search for stock symbols
+def search_stock(query):
+    url = f"https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords={query}&apikey={API_KEY}"
+    response = requests.get(url)
+    data = response.json()
+
+    # Return top 5 results if any are found
+    return data.get("bestMatches", [])[:5]
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
         symbol = request.form.get("symbol").upper()
-        amount = float(request.form.get("amount"))  # Convert to float for decimal input
+        try:
+            amount = float(request.form.get("amount"))
+        except ValueError:
+            amount = -1
 
-        # Get the live price of the stock
+        # Validate positive amount and valid stock symbol
+        if amount < 0:
+            error_message = "Please enter a positive amount."
+            return render_template("index.html", portfolio=portfolio, error=error_message)
+
         price = get_stock_price(symbol)
-        
         if price is not None:
-            # Calculate total value based on the price and amount
             total_value = price * amount
-            # Add stock data to the portfolio list
             portfolio.append({
                 "symbol": symbol,
                 "amount": amount,
@@ -50,15 +61,16 @@ def index():
                 "total_value": total_value
             })
         else:
-            # If there's an issue getting the price, add with "N/A" fields
-            portfolio.append({
-                "symbol": symbol,
-                "amount": amount,
-                "price": "N/A",
-                "total_value": "N/A"
-            })
+            error_message = "Invalid stock symbol."
+            return render_template("index.html", portfolio=portfolio, error=error_message)
 
     return render_template("index.html", portfolio=portfolio)
+
+@app.route("/search", methods=["GET"])
+def search():
+    query = request.args.get("query")
+    results = search_stock(query)
+    return jsonify(results)
 
 if __name__ == "__main__":
     app.run(debug=True)
