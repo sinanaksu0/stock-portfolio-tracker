@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stock Portfolio Tracker</title>
+</head>
+<body>
+    <h1>Stock Portfolio Tracker</h1>
+    <form method="post">
+        <input type="text" name="symbol" placeholder="Enter stock symbol" required>
+        <input type="number" name="amount" placeholder="Enter amount of stock" required step="any">
+        <button type="submit">Add Stock</button>
+    </form>
+    
+    <h2>Your Portfolio</h2>
+    <table>
+        <tr>
+            <th>Symbol</th>
+            <th>Amount</th>
+            <th>Price per Stock</th>
+            <th>Total Value ($)</th>
+        </tr>
+        {% for stock in portfolio %}
+        <tr>
+            <td>{{ stock.symbol }}</td>
+            <td>{{ stock.amount }}</td>
+            <td>{{ stock.price }}</td>
+            <td>{{ stock.total_value }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>
