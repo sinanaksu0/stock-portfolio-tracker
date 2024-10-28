@@ -7,10 +7,7 @@
 <body>
     <h1>Stock Portfolio Tracker</h1>
     <form method="post">
-        <input type="text" id="search" placeholder="Search for stock symbol" autocomplete="off">
-        <div id="search-results" style="display:none; border:1px solid #ccc; max-width:200px; position:absolute; background:white;"></div>
-        
-        <input type="text" name="symbol" id="symbol" placeholder="Enter stock symbol" required readonly>
+        <input type="text" name="symbol" id="symbol" placeholder="Enter stock symbol" required>
         <input type="number" name="amount" placeholder="Enter amount of stock" required step="any">
         <button type="submit">Add Stock</button>
     </form>
@@ -36,42 +33,5 @@
         </tr>
         {% endfor %}
     </table>
-
-    <script>
-        const searchInput = document.getElementById("search");
-        const resultsDiv = document.getElementById("search-results");
-        const symbolInput = document.getElementById("symbol");
-
-        searchInput.addEventListener("input", () => {
-            const query = searchInput.value;
-            if (query.length > 1) {
-                fetch(`/search?query=${query}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        resultsDiv.innerHTML = "";
-                        data.forEach(item => {
-                            const symbol = item["1. symbol"];
-                            const name = item["2. name"];
-                            const div = document.createElement("div");
-                            div.innerText = `${symbol} - ${name}`;
-                            div.onclick = () => {
-                                symbolInput.value = symbol;
-                                resultsDiv.style.display = "none";
-                            };
-                            resultsDiv.appendChild(div);
-                        });
-                        resultsDiv.style.display = "block";
-                    });
-            } else {
-                resultsDiv.style.display = "none";
-            }
-        });
-
-        document.addEventListener("click", (e) => {
-            if (!resultsDiv.contains(e.target) && e.target !== searchInput) {
-                resultsDiv.style.display = "none";
-            }
-        });
-    </script>
 </body>
 </html>
