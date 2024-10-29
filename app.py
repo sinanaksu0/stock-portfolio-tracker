@@ -28,7 +28,7 @@ def index():
         # Validate positive amount and valid stock symbol
         if amount < 0:
             error_message = "Please enter a positive amount."
-            return render_template("index.html", portfolio=portfolio, error=error_message)
+            return render_template("index.html", portfolio=portfolio, error=error_message, total_portfolio_value=calculate_total_portfolio_value())
 
         price = get_stock_price(symbol)
         if price is not None:
@@ -41,9 +41,13 @@ def index():
             })
         else:
             error_message = "Invalid stock symbol."
-            return render_template("index.html", portfolio=portfolio, error=error_message)
+            return render_template("index.html", portfolio=portfolio, error=error_message, total_portfolio_value=calculate_total_portfolio_value())
 
-    return render_template("index.html", portfolio=portfolio)
+    return render_template("index.html", portfolio=portfolio, total_portfolio_value=calculate_total_portfolio_value())
+
+# Function to calculate total portfolio value
+def calculate_total_portfolio_value():
+    return sum(stock['total_value'] for stock in portfolio)
 
 if __name__ == "__main__":
     app.run(debug=True)
